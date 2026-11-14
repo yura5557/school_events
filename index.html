@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Мероприятия школы №18</title>
+  <style>
+    /* Общие цвета и размеры. CSS Grid ставит карточки в колонки. */
+    :root {
+      --paper: #f4f3ec;
+      --white: #fffefa;
+      --ink: #172c27;
+      --muted: #546660;
+      --green: #194c3c;
+      --light: #e3eee7;
+      --line: #d5ded5;
+      --red: #9b343b;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font: 16px/1.55 Inter, system-ui, sans-serif;
+    }
+    a { color: var(--green); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { line-height: 1.15; }
+    h1 { margin-bottom: 14px; font-size: clamp(2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-bottom: 18px; font-size: clamp(1.55rem, 3vw, 2.15rem); letter-spacing: -.035em; }
+    h3 { margin-bottom: 14px; overflow-wrap: anywhere; }
+    .container { width: min(1100px, calc(100% - 48px)); margin-inline: auto; }
+
+    .site-header { background: var(--white); border-bottom: 1px solid var(--line); }
+    .header-content {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px 24px;
+      flex-wrap: wrap;
+      padding-block: 12px;
+    }
+    .brand { font-weight: 800; letter-spacing: -.025em; text-decoration: none; }
+    nav { display: flex; flex-wrap: wrap; gap: 4px; }
+    nav a {
+      padding: 7px 10px;
+      border-radius: 6px;
+      color: var(--ink);
+      font-size: .9rem;
+      font-weight: 650;
+      text-decoration: none;
+    }
+    nav a:hover, nav a[aria-current="page"] { background: var(--light); color: var(--green); }
+
+    main { padding-block: 32px 56px; }
+    .hero {
+      margin-bottom: 34px;
+      padding: clamp(24px, 6vw, 60px);
+      border-radius: 18px;
+      background: #174336;
+      background-image: radial-gradient(ellipse at top right, #36745c, transparent 58%);
+      color: var(--white);
+    }
+    .hero h1 { max-width: 650px; }
+    .hero p { max-width: 46ch; color: #e2efe8; margin-bottom: 22px; }
+    .section-title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+    .section-title h2 { margin-bottom: 12px; }
+    .card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .panel, .event-card {
+      padding: 20px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .event-card { border-top: 4px solid #70a38b; }
+    .date-line { display: flex; flex-wrap: wrap; gap: 5px 10px; color: var(--green); font-weight: 750; }
+    .example { font-size: .8rem; color: var(--muted); }
+    dl { margin: 0; }
+    dt { color: var(--muted); font-size: .8rem; }
+    dd { margin: 0 0 8px; overflow-wrap: anywhere; }
+    dd:last-child { margin-bottom: 0; }
+
+    .teacher-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    .teacher-list { margin-top: 26px; }
+    .filters, .fields-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+    .filters > div, .fields-row > div { flex: 1 1 145px; min-width: 0; }
+    .field { margin-bottom: 14px; }
+    label, legend { display: block; margin-bottom: 4px; font-size: .92rem; font-weight: 650; }
+    input:not([type="checkbox"]), select {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 10px;
+      font: inherit;
+      color: inherit;
+      background: #fff;
+      border: 1px solid #aebcb2;
+      border-radius: 7px;
+    }
+    fieldset { min-width: 0; margin: 0 0 16px; padding: 0; border: 0; }
+    .grades { display: flex; flex-wrap: wrap; gap: 6px; }
+    .grades label { margin: 0; padding: 4px 7px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+    .grades input { accent-color: var(--green); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .event-card .actions { margin-top: 14px; }
+    .button {
+      display: inline-block;
+      padding: 9px 13px;
+      color: var(--green);
+      background: var(--white);
+      border: 1px solid #aebcb2;
+      border-radius: 7px;
+      font: inherit;
+      font-size: .9rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .button:hover { background: var(--light); }
+    .primary { background: var(--green); border-color: var(--green); color: #fff; }
+    .primary:hover { background: #123b2e; }
+    .hero .button { border-color: var(--white); }
+    .danger { color: var(--red); }
+    :focus-visible { outline: 3px solid #4b8f73; outline-offset: 2px; }
+    .muted, .status, .empty { color: var(--muted); }
+    .status { margin: 10px 0 0; }
+    .status:empty { margin: 0; }
+    .result { margin-block: 14px; }
+    .about { max-width: 73ch; }
+    .about p:last-child { margin-bottom: 0; }
+
+    /* На узком экране колонки становятся одним вертикальным списком. */
+    @media (max-width: 790px) {
+      .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .teacher-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 540px) {
+      .container { width: calc(100% - 28px); }
+      .card-grid { grid-template-columns: 1fr; }
+      main { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="#home">Школа №18</a>
+      <nav aria-label="Разделы сайта">
+        <a href="#home">Главная</a>
+        <a href="#schedule">Расписание</a>
+        <a href="#add" id="add-link">Добавить мероприятие</a>
+        <a href="#about">О проекте</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Все разделы находятся в одном файле. Скрипт показывает один раздел по адресу после #. -->
+    <section id="home" class="view" aria-labelledby="home-title">
+      <div class="hero">
+        <h1 id="home-title">Школьные мероприятия</h1>
+        <p>Расписание олимпиад, соревнований и других событий школы №18.</p>
+        <a class="button" href="#schedule">Открыть расписание</a>
+      </div>
+      <div class="section-title"><h2>Ближайшие события</h2></div>
+      <p id="home-empty" class="panel empty" hidden>Предстоящих мероприятий пока нет.</p>
+      <div id="home-list" class="card-grid"></div>
+    </section>
+
+    <section id="schedule" class="view" aria-labelledby="schedule-title" hidden>
+      <h1 id="schedule-title">Расписание</h1>
+      <p id="shared-message" class="muted" hidden></p>
+      <div class="panel filters">
+        <div>
+          <label for="date-filter">Дата мероприятия</label>
+          <input type="date" id="date-filter">
+        </div>
+        <div>
+          <label for="grade-filter">Класс</label>
+          <select id="grade-filter"><option value="">Все классы</option></select>
+        </div>
+        <button type="button" class="button" id="reset-filters">Сбросить фильтры</button>
+      </div>
+      <p id="result" class="muted result" role="status"></p>
+      <div id="schedule-list" class="card-grid"></div>
+    </section>
+
+    <section id="add" class="view" aria-labelledby="form-title" hidden>
+      <h1 id="form-title">Для учителя</h1>
+      <div class="teacher-layout">
+        <form class="panel" id="event-form">
+          <h2 id="form-heading">Добавить мероприятие</h2>
+          <div class="field">
+            <label for="event-title">Название</label>
+            <input id="event-title" maxlength="100" required>
+          </div>
+          <div class="fields-row">
+            <div class="field">
+              <label for="event-date">Дата</label>
+              <input type="date" id="event-date" min="1900-01-01" max="9999-12-31" required>
+            </div>
+            <div class="field">
+              <label for="event-time">Время</label>
+              <input type="time" id="event-time" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="event-place">Место</label>
+            <input id="event-place" maxlength="100" required>
+          </div>
+          <fieldset>
+            <legend>Классы</legend>
+            <div class="grades" id="grade-fields"></div>
+          </fieldset>
+          <div class="actions">
+            <button class="button primary" id="save-event" type="submit">Добавить</button>
+            <button class="button" id="cancel-edit" type="button" hidden>Отменить</button>
+          </div>
+          <p id="form-status" class="status" role="status"></p>
+        </form>
+        <section class="panel" aria-labelledby="share-title">
+          <h2 id="share-title">Ссылка для учеников</h2>
+          <p class="muted">Ссылка передаёт расписание на момент создания. После изменений создайте новую ссылку.</p>
+          <button class="button" id="share-button" type="button">Создать ссылку</button>
+          <div id="share-output" hidden>
+            <p class="status">Скопируйте адрес из поля ниже.</p>
+            <label for="share-url">Адрес расписания</label>
+            <input id="share-url" type="text" readonly>
+          </div>
+          <p id="share-status" class="status" role="status"></p>
+        </section>
+      </div>
+      <section class="teacher-list" aria-labelledby="manage-title">
+        <h2 id="manage-title">Управление мероприятиями</h2>
+        <p id="manage-empty" class="panel empty" hidden>Список мероприятий пуст.</p>
+        <div id="manage-list" class="card-grid"></div>
+      </section>
+    </section>
+
+    <section id="about" class="view" aria-labelledby="about-title" hidden>
+      <h1 id="about-title">О проекте</h1>
+      <div class="panel about">
+        <p>Это учебный сайт с расписанием мероприятий школы №18. На главной видны ближайшие события. В полном расписании можно выбрать дату и класс.</p>
+        <p>Учитель вносит изменения в своём браузере. Браузер сохраняет список в localStorage. Чтобы передать расписание, учитель создаёт ссылку и отправляет её ученикам после размещения сайта по адресу, доступному получателям. По ссылке открывается копия списка для просмотра.</p>
+        <p>Карточки с отметкой «Пример» нужны для демонстрации. Их можно заменить настоящими мероприятиями в разделе для учителя.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Шаблон карточки копируется для каждого мероприятия. -->
+  <template id="event-template">
+    <article class="event-card">
+      <p class="date-line"><time></time><span class="example" hidden>Пример</span></p>
+      <h3></h3>
+      <dl><dt>Место</dt><dd class="place"></dd><dt>Классы</dt><dd class="classes"></dd></dl>
+      <div class="actions" hidden>
+        <button class="button edit" type="button">Изменить</button>
+        <button class="button danger delete" type="button">Удалить</button>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    // Короткая функция для поиска HTML-элемента по его id.
+    const byId = (id) => document.getElementById(id);
+    const form = byId("event-form");
+    const gradeFields = byId("grade-fields");
+    const gradeFilter = byId("grade-filter");
+    const dateFilter = byId("date-filter");
+    const storageKey = "school-18-events";
+    const sharePrefix = "#schedule=";
+    const views = ["home", "schedule", "add", "about"];
+    const navLinks = document.querySelectorAll("header a[href^='#']");
+
+    // Один и тот же список номеров классов используется в форме и в фильтре.
+    for (let grade = 1; grade <= 11; grade++) {
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = grade;
+      label.append(input, " " + grade);
+      gradeFields.append(label);
+      gradeFilter.add(new Option(grade + " класс", grade));
+    }
+
+    const gradeInputs = gradeFields.querySelectorAll("input");
+
+    function twoDigits(number) {
+      return String(number).padStart(2, "0");
+    }
+
+    function dateKey(date) {
+      // Год идёт первым, поэтому такие строки удобно сравнивать при сортировке.
+      return date.getFullYear() + "-" + twoDigits(date.getMonth() + 1) + "-" + twoDigits(date.getDate());
+    }
+
+    function dateAfter(days) {
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      return dateKey(date);
+    }
+
+    function sampleEvents() {
+      // Даты примеров зависят от дня открытия сайта, чтобы показать работу главной.
+      return [
+        { title: "Шахматный турнир", date: dateAfter(2), time: "14:30", place: "Библиотека", grades: [7, 8, 9], sample: true },
+        { title: "Олимпиада по информатике", date: dateAfter(5), time: "15:00", place: "Кабинет информатики", grades: [8, 9, 10], sample: true },
+        { title: "Весёлые старты", date: dateAfter(7), time: "12:00", place: "Спортивный зал", grades: [5, 6], sample: true }
+      ];
+    }
+
+    function readEvents(text) {
+      // Эта проверка нужна и для хранилища, и для данных из чужой ссылки.
+      const items = JSON.parse(text);
+      if (!Array.isArray(items) || !items.every(isEvent)) {
+        throw new Error("Неверный формат расписания");
+      }
+      return items;
+    }
+
+    function isEvent(item) {
+      return item && typeof item.title === "string" && item.title.trim() &&
+        typeof item.place === "string" && item.place.trim() &&
+        typeof item.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
+        dateKey(new Date(item.date + "T12:00")) === item.date &&
+        typeof item.time === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(item.time) &&
+        Array.isArray(item.grades) && item.grades.length > 0 &&
+        item.grades.every((grade) => Number.isInteger(grade) && grade >= 1 && grade <= 11);
+    }
+
+    function loadEvents() {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        return saved === null ? sampleEvents() : readEvents(saved);
+      } catch {
+        byId("form-status").textContent = "Не удалось прочитать сохранённое расписание.";
+        return [];
+      }
+    }
+
+    const events = loadEvents();
+    let sharedEvents = null;
+    let sharedMode = false;
+    let editingEvent = null;
+
+    function saveEvents(message) {
+      try {
+        // localStorage принимает только строки. JSON.stringify превращает весь массив в строку.
+        localStorage.setItem(storageKey, JSON.stringify(events));
+        byId("form-status").textContent = message;
+      } catch {
+        byId("form-status").textContent = "Изменение видно до закрытия страницы. Браузер не сохранил расписание.";
+      }
+      byId("share-output").hidden = true;
+      byId("share-status").textContent = "";
+      refreshLists();
+    }
+
+    function eventStart(item) {
+      return item.date + "T" + item.time;
+    }
+
+    function drawCards(items, container, allowEditing = false) {
+      container.replaceChildren();
+      for (const item of items) {
+        const card = byId("event-template").content.cloneNode(true);
+        const date = new Date(item.date + "T12:00");
+        const time = card.querySelector("time");
+        time.dateTime = eventStart(item);
+        time.textContent = date.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }) + " · " + item.time;
+        card.querySelector(".example").hidden = !item.sample;
+        // textContent показывает введённые данные как текст, даже если в них есть знаки HTML.
+        card.querySelector("h3").textContent = item.title;
+        card.querySelector(".place").textContent = item.place;
+        card.querySelector(".classes").textContent = item.grades.join(", ");
+        if (allowEditing) {
+          card.querySelector(".actions").hidden = false;
+          card.querySelector(".edit").addEventListener("click", () => editEvent(item));
+          card.querySelector(".delete").addEventListener("click", () => deleteEvent(item));
+        }
+        container.append(card);
+      }
+    }
+
+    function sortedEvents() {
+      // Копия массива нужна, потому что sort меняет порядок элементов в самом массиве.
+      const items = sharedMode ? sharedEvents : events;
+      return [...items].sort((a, b) => eventStart(a).localeCompare(eventStart(b)));
+    }
+
+    function refreshLists() {
+      const sorted = sortedEvents();
+      const now = new Date();
+      const currentMinute = dateKey(now) + "T" + twoDigits(now.getHours()) + ":" + twoDigits(now.getMinutes());
+      const upcoming = sorted.filter((item) => eventStart(item) >= currentMinute).slice(0, 3);
+      byId("home-empty").hidden = upcoming.length > 0;
+      drawCards(upcoming, byId("home-list"));
+
+      // Пустое поле означает, что условие по нему не применяется.
+      const filtered = sorted.filter((item) => {
+        const dateMatches = !dateFilter.value || item.date === dateFilter.value;
+        const gradeMatches = !gradeFilter.value || item.grades.includes(Number(gradeFilter.value));
+        return dateMatches && gradeMatches;
+      });
+      byId("result").textContent = filtered.length ? "Найдено мероприятий: " + filtered.length : "Мероприятий по этим условиям нет.";
+      drawCards(filtered, byId("schedule-list"));
+
+      if (!sharedMode) {
+        byId("manage-empty").hidden = sorted.length > 0;
+        drawCards(sorted, byId("manage-list"), true);
+      }
+    }
+
+    function resetForm() {
+      editingEvent = null;
+      form.reset();
+      byId("form-heading").textContent = "Добавить мероприятие";
+      byId("save-event").textContent = "Добавить";
+      byId("cancel-edit").hidden = true;
+    }
+
+    function editEvent(item) {
+      editingEvent = item;
+      byId("event-title").value = item.title;
+      byId("event-date").value = item.date;
+      byId("event-time").value = item.time;
+      byId("event-place").value = item.place;
+      for (const input of gradeInputs) {
+        input.checked = item.grades.includes(Number(input.value));
+      }
+      byId("form-heading").textContent = "Изменить мероприятие";
+      byId("save-event").textContent = "Сохранить";
+      byId("cancel-edit").hidden = false;
+      byId("form-status").textContent = "";
+      byId("event-title").focus();
+    }
+
+    function deleteEvent(item) {
+      if (!window.confirm("Удалить мероприятие «" + item.title + "»?")) {
+        return;
+      }
+      // indexOf находит объект в массиве, а splice удаляет его.
+      events.splice(events.indexOf(item), 1);
+      if (editingEvent === item) {
+        resetForm();
+      }
+      saveEvents("Мероприятие удалено.");
+      byId("event-title").focus();
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault(); // Без этой строки браузер попытался бы отправить форму и перезагрузить страницу.
+      const item = {
+        title: byId("event-title").value.trim(),
+        date: byId("event-date").value,
+        time: byId("event-time").value,
+        place: byId("event-place").value.trim(),
+        grades: [...gradeInputs].filter((input) => input.checked).map((input) => Number(input.value))
+      };
+
+      if (!isEvent(item)) {
+        byId("form-status").textContent = "Проверьте поля и отметьте хотя бы один класс.";
+        return;
+      }
+
+      const message = editingEvent ? "Изменения сохранены." : "Мероприятие добавлено.";
+      if (editingEvent) {
+        events[events.indexOf(editingEvent)] = item;
+      } else {
+        events.push(item);
+      }
+      resetForm();
+      saveEvents(message);
+      byId("event-title").focus();
+    });
+
+    byId("cancel-edit").addEventListener("click", () => {
+      resetForm();
+      byId("form-status").textContent = "Редактирование отменено.";
+      byId("event-title").focus();
+    });
+
+    dateFilter.addEventListener("change", refreshLists);
+    gradeFilter.addEventListener("change", refreshLists);
+    byId("reset-filters").addEventListener("click", () => {
+      dateFilter.value = "";
+      gradeFilter.value = "";
+      refreshLists();
+    });
+
+    byId("share-button").addEventListener("click", () => {
+      // Кодируем JSON для адресной строки. Часть адреса после # читает сам браузер.
+      const link = location.href.split("#")[0] + sharePrefix + encodeURIComponent(JSON.stringify(sortedEvents()));
+      const note = byId("share-status");
+      byId("share-output").hidden = true;
+      if (link.length > 12000) {
+        note.textContent = "Ссылка получилась слишком длинной. Сократите список или названия мероприятий.";
+        return;
+      }
+      note.textContent = location.protocol === "file:" ?
+        "Сейчас сайт открыт как файл. Для отправки ученикам откройте сайт по сетевому адресу и создайте ссылку там." : "";
+      const field = byId("share-url");
+      field.value = link;
+      byId("share-output").hidden = false;
+      field.select();
+    });
+
+    function readSharedLink() {
+      if (!location.hash.startsWith(sharePrefix)) {
+        return;
+      }
+      sharedMode = true;
+      const message = byId("shared-message");
+      message.hidden = false;
+
+      try {
+        const encoded = location.hash.slice(sharePrefix.length);
+        sharedEvents = readEvents(decodeURIComponent(encoded));
+        message.textContent = "Копия расписания из ссылки. Актуальную версию можно получить у учителя.";
+      } catch {
+        sharedEvents = [];
+        message.textContent = "Не удалось открыть расписание. Проверьте, что ссылка скопирована целиком.";
+      }
+
+      byId("add-link").hidden = true;
+      // Сохраняем данные ссылки в адресе и при переходе в другие разделы.
+      for (const link of document.querySelectorAll("a[href^='#']")) {
+        const section = link.getAttribute("href").slice(1);
+        link.href = location.hash + "&view=" + section;
+      }
+    }
+
+    function showView() {
+      const hash = location.hash;
+      let view = hash.slice(1);
+
+      // При переходах внутри копии короткий суффикс указывает нужный раздел.
+      if (sharedMode) {
+        view = hash.split("&view=")[1] || "schedule";
+        if (view === "add") view = "schedule";
+      }
+      if (!views.includes(view)) view = "home";
+
+      for (const id of views) {
+        byId(id).hidden = id !== view;
+      }
+      for (const link of navLinks) {
+        if (link.closest("nav") && (link.hash === "#" + view || link.hash.endsWith("&view=" + view))) {
+          link.setAttribute("aria-current", "page");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      }
+      refreshLists();
+    }
+
+    readSharedLink();
+    showView();
+    window.addEventListener("hashchange", () => {
+      // Если в этой вкладке открыли другую ссылку, заново читаем данные из адреса.
+      const hasSharedLink = location.hash.startsWith(sharePrefix);
+      const sharedData = location.hash.split("&view=")[0];
+      if (hasSharedLink !== sharedMode || (sharedMode && sharedData !== initialSharedData)) {
+        location.reload();
+        return;
+      }
+      showView();
+    });
+    const initialSharedData = location.hash.split("&view=")[0];
+  </script>
+</body>
+</html>
